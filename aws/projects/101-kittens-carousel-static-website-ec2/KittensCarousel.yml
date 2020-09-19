@@ -1,15 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template creates an EC2 instance to run a static website application deployed with Apache Web Server
+Description: |
+  Cloudformation Template for Kittens Carousel Static Website on EC2. This 
+  template deploys Kittens Carousel Static website on Amazon Linux 2 EC2 
+  Instance with custom security group allowing HTTP connections on port 80.
+  Kittens Carousel Static Website is downloaded from Github repository, then
+  deployed on Apache Web Server
   
 Resources:
   WebServerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupDescription: Allow http to client host
-      GroupName: ApacheSG
-      Tags:
-        - Key: Name
-          Value: Apache
+      GroupDescription: Enable HTTP for Apache Web Server and ssh for terminal
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -18,18 +19,18 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0  
-  KittensCarouselStaticWebsiteCFInstance:
-    Type: AWS::EC2::Instance
+          CidrIp: 0.0.0.0/0
+  WebServerHost:
+    Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0c94855ba95c71c99
       InstanceType: t2.micro
       KeyName: virginia_key
-      SecurityGroups:
-        - SSH and HTTP
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
       Tags:
         - Key: Name
-          Value: Kittens_Apache
+          Value: !Sub Web Server of ${AWS::StackName} Stack
       UserData:
         Fn::Base64:
           !Sub |
@@ -45,18 +46,10 @@ Resources:
             wget https://raw.githubusercontent.com/GustavoYoung/Clarusway_aws_devops_workshop/master/aws/projects/101-kittens-carousel-static-website-ec2/static-web/cat2.jpg
             systemctl start httpd
             systemctl enable httpd
-  
+      
 Outputs:
-  InstanceId:
-    Description: InstanceId of the first EC2 instance
-    Value: !Ref KittensCarouselStaticWebsiteCFInstance
-  PublicDNS:
-    Description: Public DNS Name of the EC2 instance
-    Value: !GetAtt 
-      - KittensCarouselStaticWebsiteCFInstance
-      - PublicDnsName
-  PublicIP:
-    Description: Public IP address of the EC2 instance
-    Value: !GetAtt 
-      - KittensCarouselStaticWebsiteCFInstance
-      - PublicIp
+  WebsiteURL:
+    Value: !Sub 
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt WebServerHost.PublicDnsName
+    Description: Kittens Carousel Application URL
