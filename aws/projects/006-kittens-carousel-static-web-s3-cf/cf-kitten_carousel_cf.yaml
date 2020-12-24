@@ -1,13 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Cloudformation Template for kittens carousel static website deploy on s3. This static
-  website is distributed by cloudfront. Cloudfront DNS is published by Route 53 using full domain name.
+  Cloudformation Template for kittens carousel static website deploy on s3. cloudfront and route 53
 Parameters:
   DomainName:
-    Description: DNS Name of existing Amazon Route 53 hosted zone
+    Description: DNS Name of existing Amazon Route 53 hosted zone ex. clarusway.us
     Type: AWS::Route53::HostedZone::Id
   KittensDomainName:
-    Description: Full domain name for the App.
+    Description: Full domain name for the App. ex. kittens.clarusway.us
     Type: String
     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
 Resources:
@@ -19,7 +18,7 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
   KittensBucketPolicy:
-    Type: "AWS::S3::BucketPolicy"
+    Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref KittensBucket
       PolicyDocument: 

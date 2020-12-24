@@ -1,35 +1,34 @@
-# Milliseconds Converter Application (Python Flask)
-
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-@app.route('/', methods = ['GET'])
-def converter_get ():
-    return render_template('index.html', developer_name = 'Gustavo', not_valid = False)
 
-@app.route('/', methods = ['POST'])
-def converter_post():
-    num = request.form['number']
+def convert(millisecond):
+    hour_in_millisecond = 60*60*1000
+    hours = millisecond // hour_in_millisecond
+    millisecond_left = millisecond % hour_in_millisecond
 
-    if not num.isdecimal():
-        return render_template('index.html', developer_name = 'Gustavo', not_valid = True)
+    minute_in_millisecond = 60*1000
+    minutes = millisecond_left // minute_in_millisecond
+    millisecond_left %= minute_in_millisecond
 
-    elif num.isnumeric():
-        numalpha = int(num)
-    
-        if numalpha < 1:
-            return render_template('index.html', developer_name='Gustavo', not_valid = True)
+    seconds = millisecond_left // 1000
 
-        elif numalpha > 0:
-            hour = numalpha // (1000*60*60)
-            minute = (numalpha - hour * (1000*60*60)) // (1000*60)
-            sec = (numalpha - hour * (1000*60*60) -
-                   minute * (1000*60)) // (1000)
-            result = (f'{hour} hour/s'*(hour != 0) + f' {minute} minute/s'*(minute != 0) +
-                      f' {sec} second/s' * (sec != 0) or f'just {num} millisecond/s' * (numalpha < 1000))
-            return render_template('result.html', developer_name = 'Gustavo', milliseconds=numalpha, not_valid=False, result=result)
-            
-if __name__ == "__main__":
+    return f'{hours} hour/s '*(hours!=0) + f'{minutes} minute/s '*(minutes!=0) + f'{seconds} second/s '*(seconds!=0) or f'just {millisecond} millisecond/s'
+
+@app.route('/', methods=['GET'])
+def main_get():
+        return render_template('index.html', developer_name ='Serdar', not_valid = False)
+
+@app.route('/', methods=['POST'])
+def main_post():
+    alpha = request.form['number']
+    if not alpha.isdecimal():
+        return render_template('index.html', developer_name = 'Serdar', not_valid = True)
+    if not (0 < int(alpha)):
+        return render_template('index.html', developer_name = 'Serdar', not_valid = True)
+    return render_template('result.html', developer_name=' Serdar', milliseconds = alpha, result = convert(int(alpha)) )
+
+if __name__ == '__main__':
     #app.run(debug=True)
     app.run(host='0.0.0.0', port=80)
